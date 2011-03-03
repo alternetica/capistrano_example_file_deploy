@@ -1,8 +1,11 @@
 require 'erb'
-set :application, "application"                     # Name of Application
-set :production_domain, 'production_domain.com'     # Domain of server production
-set :test_domain, 'test_domain.com'                 # Domain of server test
-# server details
+
+set :application, "xxxx.com"
+set :production_domain, 'xxxx.com'
+set :test_domain, 'test.xxxx.com'
+set :development_domain, 'development.xxxx.com'
+
+# server details user hosting
 set :use_sudo, false
 set :user, "user_server_hosting"                   # ssh user production server.
 set :password, "password"                          # password user
@@ -19,12 +22,27 @@ set :deploy_via, :remote_cache
 
 task :development do                                  #-> config test
   # server_mysql config
-  set :user_mysql, 'user_mysql_test'                       #-> user mysql2
-  set :password_mysql,'passord_mysql_test'                 #-> password
-  set :server_mysql,'host_mysql_db_test'                   #-> host database mysql
-  set :databasename, 'database_name_mysql_test'            #-> database name
+  set :user_driver, 'user_driver_development'                       #-> user mysql2
+  set :password_driver,'passord_driver_development'                 #-> password
+  set :server_driver,'host_driver_db_development'                   #-> host database mysql
+  set :databasename, 'database_name_driver_development'            #-> database name
   set :rails_env, "production"
-  set :deploy_to, "/home/#{user}/#{test_domain}"       # path for deploy
+  set :deploy_to, "/home/#{user}/#{development_domain}"
+  set :deploy_via, :remote_cache
+  role :web, "#{development_domain}"                          # Your HTTP server, Apache/etc
+  role :app, "#{development_domain}"                          # This may be the same as your `Web` server
+  role :db,  "#{development_domain}", :primary => true # This is where Rails migrations will run
+  role :db,  "#{development_domain}"
+end
+
+task :tests do
+  # server_mysql config
+  set :user_driver, 'user_driver_test'                       #-> user mysql2
+  set :password_driver,'passord_driver_test'                 #-> password
+  set :server_driver,'host_driver_db_test'                   #-> host database mysql
+  set :databasename, 'database_name_driver_development'            #-> database name
+  set :rails_env, "production"
+  set :deploy_to, "/home/#{user}/#{test_domain}"
   set :deploy_via, :remote_cache
   role :web, "#{test_domain}"                          # Your HTTP server, Apache/etc
   role :app, "#{test_domain}"                          # This may be the same as your `Web` server
@@ -35,15 +53,13 @@ end
 
 # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `perforce`, `subversion` or `none`
 task :production do                                          #-> config production
-  # server_mysql config
-  set :user_mysql, 'user_mysql_production'
-  set :password_mysql,'password_mysql_production'
-  set :server_mysql,'host_mysql_db_production'
-  set :databasename, 'database_name_mysql_production'
+  set :user_driver, 'user_driver_production'                       #-> user mysql2
+  set :password_driver,'passord_driver_production'                 #-> password
+  set :server_driver,'host_driver_db_production'                   #-> host database mysql
+  set :databasename, 'database_name_driver_production'            #-> database name
   set :rails_env, "production"
-  set :deploy_to, "/home/#{user}/#{production_domain}"
+  set :deploy_to, "/home/#{user}/#{test_domain}"
   set :deploy_via, :remote_cache
-
   role :web, "#{production_domain}"                          # Your HTTP server, Apache/etc
   role :app, "#{production_domain}"                          # This may be the same as your `Web` server
   role :db,  "#{production_domain}", :primary => true # This is where Rails migrations will run
@@ -55,9 +71,7 @@ end
 # these http://github.com/rails/irs_process_scripts
 
  namespace :deploy do
-   task :start do
-     update_links
-   end
+   task :start do ; end
    task :stop do ; end
 
    task :restart, :roles => :app, :except => { :no_release => true } do
@@ -66,20 +80,40 @@ end
 
 
    task :update_links do
-     run "ln -s #{shared_path}/config/database.yml #{release_path}/config/database.yml"
+     run "ln -s #{shared_path}/config/database.yml #{current_path}/config/database.yml"
      run "ln -s #{shared_path}/uploads #{current_path}/public/uploads"
      run "ln -s #{shared_path}/reports #{current_path}/public/reports"
    end
  end
 
- after 'deploy:update_code','deploy:update_links'
+ #after 'deploy:update_code','deploy:update_links'
 
  desc "initialization files and directories by default."
  namespace :setup do
+
    task :all do
      uploads
      reports
      database
+   end
+
+   task :clean_all do
+     clean_current
+     clean_release
+     clean_shared
+     all
+   end
+
+   task :clean_shared do
+     run "rm -rf  #{shared_path}/*"
+   end
+
+   task :clean_current do
+     run "rm -rf  #{current_path}/*"
+   end
+
+   task :clean_release do
+     run "rm -rf  #{release_path}/*"
    end
 
    desc "uploads initialization."
@@ -111,9 +145,9 @@ production:
   reconnect: false
   pool: 5
   database: #{databasename}
-  host: #{server_mysql}
-  username: #{user_mysql}
-  password: #{password_mysql}
+  host: #{server_driver}
+  username: #{user_driver}
+  password: #{password_driver}
     EOF
     run "mkdir -p #{shared_path}/config"
     put database.result, "#{shared_path}/config/database.yml"
