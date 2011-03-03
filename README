@@ -1,0 +1,86 @@
+Welcome to deploy.rb
+
+This project was motivated by the large number of examples in the web about how to deploy,
+only concentrate the best of all classified documents and my experience on best practices.
+
+This file is configured to handle 3 working environments.
+
+  development
+  tests
+  production
+
+How to use?
+
+  Capistrano installed, <gem install capistrano>
+
+
+Set the parameters according to the servers and environments that want to manage.
+Example
+
+Domain and system parameters
+  set :application, "synergy.com"
+  set :production_domain, '4dsynergy.com'
+  set :test_domain, 'test.4dsynergy.com'
+  set :development_domain, 'development.4dsynergy.com'
+  set :database_driver, 'pg'
+
+Repository Parameters
+set :scm_username, "casp"                      # github user
+set :repository, "git@github.com:casp/capistrano_example_file_deploy.git"  # github repository
+
+
+After setting the parameters according to your needs.
+
+task :development do
+  # server_mysql config
+  set :user_driver, '4dsynergy_soft'
+  set :password_driver,'1890iopkl,m'
+  set :database_server,'system.4dsynergy.com'
+  set :databasename, 'synergy_development'
+  set :rails_env, "production"
+  set :deploy_to, "/home/#{user}/#{development_domain}"
+  set :deploy_via, :remote_cache
+  role :web, "#{development_domain}"                          # Your HTTP server, Apache/etc
+  role :app, "#{development_domain}"                          # This may be the same as your `Web` server
+  role :db,  "#{development_domain}", :primary => true # This is where Rails migrations will run
+  role :db,  "#{development_domain}"
+end
+
+
+After setting all of the Parameters in the root of our project we have to run the following command.
+
+ If the server has never been realizao an example deploy
+ cap <environment>  deploy:setup
+   ExamplesUpdates links
+     cap development deploy:setup
+     cap tests       deploy:setup
+     cap production  deploy:setup
+
+ cap <environment>  setup:all
+    Examples
+      cap development setup:all
+      cap test        setup:all
+      cap production  setup:all
+
+From now to make the deployments we have to do the following
+ cap <environment>  deploy
+    Examples
+     cap development deploy
+     cap tests       deploy
+     cap production  deploy
+
+Updates links
+ cap <environment> update_links
+   Examples
+     cap development update_links
+     cap tests       update_links
+     cap production  update_links
+
+Any observation stand at the order.
+
+#References.
+#name: Cesar A. P. Sulbaran
+#alias: casp
+#twitter: @ cesulbaran
+#emails: cesulbaran@gmail.com
+

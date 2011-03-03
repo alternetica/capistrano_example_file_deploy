@@ -1,10 +1,17 @@
 require 'erb'
 
+#References.
+#name: Cesar A. P. Sulbaran
+#alias: casp
+#twitter: @ cesulbaran
+#emails: cesulbaran@gmail.com
+
+#Domain and system parameters
 set :application, "xxxx.com"
 set :production_domain, 'xxxx.com'
 set :test_domain, 'test.xxxx.com'
 set :development_domain, 'development.xxxx.com'
-
+set :database_driver, 'mysql2' # pg, mysql2,
 # server details user hosting
 set :use_sudo, false
 set :user, "user_server_hosting"                   # ssh user production server.
@@ -12,7 +19,7 @@ set :password, "password"                          # password user
 default_run_options[:pty] = true
 ssh_options[:forward_agent] = true
 
-
+#Repository Parameters
 set :scm, :git
 set :scm_username, "user_github"                      # github user
 set :repository, "git@github.com:example/Mysite.git"  # github repository
@@ -140,7 +147,7 @@ end
    task :database do
     database = ERB.new <<-EOF
 production:
-  adapter: mysql2
+  adapter: #{database_driver}
   encoding: utf8
   reconnect: false
   pool: 5
