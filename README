@@ -70,11 +70,11 @@ From now to make the deployments we have to do the following
      cap production  deploy
 
 Updates links
- cap <environment> update_links
+ cap <environment> deploy:update_links
    Examples
-     cap development update_links
-     cap tests       update_links
-     cap production  update_links
+     cap development deploy:update_links
+     cap tests       deploy:update_links
+     cap production  deploy:update_links
 
 Any observation stand at the order.
 

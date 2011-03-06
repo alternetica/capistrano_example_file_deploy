@@ -65,7 +65,7 @@ task :production do                                          #-> config producti
   set :server_driver,'host_driver_db_production'                   #-> host database mysql
   set :databasename, 'database_name_driver_production'            #-> database name
   set :rails_env, "production"
-  set :deploy_to, "/home/#{user}/#{test_domain}"
+  set :deploy_to, "/home/#{user}/#{production_domain}"
   set :deploy_via, :remote_cache
   role :web, "#{production_domain}"                          # Your HTTP server, Apache/etc
   role :app, "#{production_domain}"                          # This may be the same as your `Web` server
